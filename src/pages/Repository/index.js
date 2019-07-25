@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import api from '../../services/api';
 
 import Container from '../../components/Container';
-import { Loading } from './styles';
+import { Loading, Owner } from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -51,13 +52,19 @@ export default class Repository extends Component {
     }
     return (
       <Container>
-        <ul>
+        <Owner>
+          <Link to="/">Voltar aos repositórios</Link>
+          <img src={repository.owner.avatar_url} />
+          <h1>{repository.name}</h1>
+          <p>{repository.description}</p>
+        </Owner>
+        {/* <ul>
           {issues.map(issue => (
             <li key={issue.title}>
               <small>{issue.title}</small>
             </li>
           ))}
-        </ul>
+        </ul> */}
       </Container>
     );
   }
