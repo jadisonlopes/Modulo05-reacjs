@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 
 import api from '../../services/api';
 
-// import { Container } from './styles';
+import Container from '../../components/Container';
+import { Loading } from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -44,8 +45,12 @@ export default class Repository extends Component {
 
   render() {
     const { repository, issues, loading } = this.state;
+
+    if (loading) {
+      return <Loading>Carregando</Loading>;
+    }
     return (
-      <>
+      <Container>
         <ul>
           {issues.map(issue => (
             <li key={issue.title}>
@@ -53,7 +58,7 @@ export default class Repository extends Component {
             </li>
           ))}
         </ul>
-      </>
+      </Container>
     );
   }
 }
