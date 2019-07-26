@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
+import lowerCase from 'lower-case';
 import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 import Container from '../../components/Container';
-import { Form, SubmitButton, List } from './styles';
+import { Form, SubmitButton, List, Input } from './styles';
 
 export default class Main extends Component {
   state = {
     newRepository: '',
     repositories: [],
     loading: false,
+    erro: false,
   };
 
   componentDidMount() {
@@ -36,25 +38,41 @@ export default class Main extends Component {
   handleSubmit = async env => {
     env.preventDefault();
 
-    this.setState({ loading: true });
+    this.setState({ loading: true, erro: false });
 
     const { newRepository, repositories } = this.state;
 
-    const response = await api.get(`/repos/${newRepository}`);
+    try {
+      if (newRepository === '') throw new Error('Favor informar o repositório');
 
-    const data = {
-      name: response.data.full_name,
-    };
+      if (
+        repositories.find(
+          rep => lowerCase(rep.name) === lowerCase(newRepository)
+        )
+      )
+        throw new Error('Repositório duplicado');
 
-    this.setState({
-      repositories: [...repositories, data],
-      newRepository: '',
-      loading: false,
-    });
+      const response = await api.get(`/repos/${newRepository}`);
+
+      const data = {
+        name: response.data.full_name,
+      };
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepository: '',
+        loading: false,
+      });
+    } catch (error) {
+      this.setState({ erro: true });
+      alert(error);
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
   render() {
-    const { newRepository, loading, repositories } = this.state;
+    const { newRepository, loading, repositories, erro } = this.state;
 
     return (
       <Container>
@@ -64,11 +82,12 @@ export default class Main extends Component {
         </h1>
 
         <Form onSubmit={this.handleSubmit}>
-          <input
+          <Input
             type="text"
             placeholder="Adicionar repositório"
             value={newRepository}
             onChange={this.handleInputChange}
+            erro={erro}
           />
 
           <SubmitButton loading={loading}>
