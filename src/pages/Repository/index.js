@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import api from '../../services/api';
 
 import Container from '../../components/Container';
-import { Loading, Owner, IssuesList } from './styles';
+import { Loading, Owner, IssuesList, States, Button, Page } from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -17,21 +17,24 @@ export default class Repository extends Component {
   };
 
   state = {
+    repoNome: '',
     repository: {},
     issues: [],
     loading: true,
+    estado: 'open',
+    page: 1,
   };
 
   async componentDidMount() {
     const { match } = this.props;
-
+    const { estado } = this.state;
     const repoNome = decodeURIComponent(match.params.repository);
 
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoNome}`),
       api.get(`/repos/${repoNome}/issues`, {
         params: {
-          state: 'open',
+          state: estado,
           per_page: 5,
         },
       }),
@@ -41,11 +44,53 @@ export default class Repository extends Component {
       issues: issues.data,
       repository: repository.data,
       loading: false,
+      page: 1,
+      repoNome,
     });
   }
 
+  issuesState = async state => {
+    const { repoNome } = this.state;
+
+    const issues = await api.get(`/repos/${repoNome}/issues`, {
+      params: {
+        state,
+        per_page: 5,
+      },
+    });
+
+    this.setState({
+      issues: issues.data,
+      page: 1,
+      estado: state,
+    });
+  };
+
+  issuesPage = async page => {
+    const { repoNome, estado } = this.state;
+
+    const issues = await api.get(`/repos/${repoNome}/issues`, {
+      params: {
+        state: estado,
+        page,
+        per_page: 5,
+      },
+    });
+
+    this.setState({
+      issues: issues.data,
+      page,
+    });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, estado, page } = this.state;
+    const states = [
+      { legenda: 'ABERTOS', estado: 'open' },
+      { legenda: 'FECHADOS', estado: 'closed' },
+      { legenda: 'TODOS', estado: 'all' },
+    ];
+    const buttons = ['ANTERIOR', 'PROXIMA'];
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -58,6 +103,18 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+        <States>
+          {states.map(state => (
+            <Button
+              className="buttonState"
+              type="button"
+              onClick={() => this.issuesState(state.estado)}
+              ativo={estado === state.estado}
+            >
+              {state.legenda}
+            </Button>
+          ))}
+        </States>
         <IssuesList>
           {issues.map(issue => (
             <li key={String(issue.id)}>
@@ -74,6 +131,20 @@ export default class Repository extends Component {
             </li>
           ))}
         </IssuesList>
+        <Page>
+          {buttons.map(b => (
+            <Button
+              className="buttonPage"
+              type="button"
+              onClick={() =>
+                this.issuesPage(b === 'PROXIMA' ? page + 1 : page - 1)
+              }
+              visivel={b === 'ANTERIOR' && page === 1}
+            >
+              {b}
+            </Button>
+          ))}
+        </Page>
       </Container>
     );
   }

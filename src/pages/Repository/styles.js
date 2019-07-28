@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Loading = styled.div`
   color: #fff;
@@ -8,6 +8,44 @@ export const Loading = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+`;
+
+export const States = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+  padding-top: 30px;
+`;
+
+export const Page = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  padding-top: 30px;
+`;
+
+export const Button = styled.button.attrs(props => ({
+  disabled: props.visivel,
+}))`
+  font-weight: bold;
+  height: 35px;
+  border-radius: 10px;
+  width: 100px;
+  background: #7159c1;
+  color: #fff;
+
+  ${props =>
+    props.ativo &&
+    css`
+      background: #576574;
+    `}
+
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;
 
 export const Owner = styled.header`
