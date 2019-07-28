@@ -106,7 +106,6 @@ export default class Repository extends Component {
         <States>
           {states.map(state => (
             <Button
-              className="buttonState"
               type="button"
               onClick={() => this.issuesState(state.estado)}
               ativo={estado === state.estado}
@@ -134,7 +133,6 @@ export default class Repository extends Component {
         <Page>
           {buttons.map(b => (
             <Button
-              className="buttonPage"
               type="button"
               onClick={() =>
                 this.issuesPage(b === 'PROXIMA' ? page + 1 : page - 1)
